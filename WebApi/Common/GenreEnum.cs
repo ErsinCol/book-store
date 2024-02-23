@@ -3,7 +3,7 @@ namespace WebApi.Common
     public enum GenreEnum
     {
         PersonalGrowth=1,
-        ScienceFiction,
-        Noval,
+        ScienceFiction=2,
+        Noval=3,
     }
 }
