@@ -13,18 +13,18 @@ namespace WebApi.BookOperations.GetBooks
 
         public List<BooksViewModel> Handle()
         {
-            var bookList = _dbContext.Books.OrderBy(book => book.Id).ToList<Book>();
-            List<BooksViewModel> vm = new List<BooksViewModel>();
-            foreach(var book in bookList)
-            {
-                vm.Add(new BooksViewModel(){
+            var books = _dbContext.Books
+                .OrderBy(book => book.Id)
+                .Select(book => new BooksViewModel
+                {
                     Title = book.Title,
                     Genre = ((GenreEnum)book.GenreId).ToString(),
                     PublishDate = book.PublishDate.Date.ToString("dd/MM/yyyy"),
-                    PageCount = book.PageCount,
-                });
-            }
-            return vm;
+                    PageCount = book.PageCount
+                })
+                .ToList();
+            
+            return books;
         }
     }
 

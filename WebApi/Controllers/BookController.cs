@@ -1,6 +1,7 @@
 using System.Net.Quic;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.BookOperations.CreateBook;
+using WebApi.BookOperations.DeleteBook;
 using WebApi.BookOperations.GetBooks;
 using WebApi.BookOperations.GetById;
 using WebApi.BookOperations.UpdateBook;
@@ -30,25 +31,26 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            GetByIdQuery query = new GetByIdQuery(_context);
+            BookDetailViewModel result;
             try
-            {
-                query.Id = id;
-                var result = query.Handle(); 
-                return Ok(result);
+            {  
+                GetBookDetailQuery query = new GetBookDetailQuery(_context); 
+                query.BookId = id;
+                result = query.Handle(); 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ex.Message);
             }
+            return Ok(result);
         }
 
         [HttpPost]
         public IActionResult AddBook([FromBody] CreateBookModel newBook)
         {
-            CreateBookCommand command = new CreateBookCommand(_context);
             try
             {
+                CreateBookCommand command = new CreateBookCommand(_context);
                 command.Model = newBook;
                 command.Handle();
             }
@@ -62,11 +64,10 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateBook([FromRoute] int id, [FromBody] UpdateBookModel updatedBook)
         {
-            Console.WriteLine(updatedBook);
-            UpdateBookCommand command = new UpdateBookCommand(_context);
             try
             {
-                command.Id = id;
+                UpdateBookCommand command = new UpdateBookCommand(_context);
+                command.BookId = id;
                 command.Model = updatedBook;
                 command.Handle();
             }
@@ -80,10 +81,16 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteBook([FromRoute] int id)
         {
-            var book = _context.Books.SingleOrDefault(book => book.Id == id);
-            if(book is null) return NotFound();
-            _context.Books.Remove(book);
-            _context.SaveChanges();
+            try
+            {
+                DeleteBookCommand command = new DeleteBookCommand(_context);
+                command.BookId = id;
+                command.Handle();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);  
+            }
             return Ok();
         }
     }
